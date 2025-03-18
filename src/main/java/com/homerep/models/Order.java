@@ -17,10 +17,9 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String description;
-//    @ManyToOne
-//    private Client client;
     private Long customerId;
     private Long employeeId;
+    private String customerPhone;
     @ManyToOne
     private Address address;
     @ManyToOne

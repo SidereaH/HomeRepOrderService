@@ -16,6 +16,5 @@ public class Category {
     private Long id;
     private String name;
     private String description;
-    @ManyToOne
-    private Employee bestEmployee;
+    private Long bestEmployee_id;
 }
