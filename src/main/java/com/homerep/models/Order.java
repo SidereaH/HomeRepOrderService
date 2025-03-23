@@ -25,8 +25,8 @@ public class Order {
     private Long employeeId;
     @ManyToOne
     private Address address;
-    private String paymentType;
-    private Double totalCost;
+    @ManyToOne
+    private PaymentType paymentType;
     private Boolean accepted = false;
 
 }
