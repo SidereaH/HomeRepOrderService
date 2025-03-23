@@ -1,23 +1,21 @@
 package com.homerep.models;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @AllArgsConstructor
-@NoArgsConstructor//(access = AccessLevel.PRIVATE, force = true)
+@NoArgsConstructor
 @Table(name = "addresses")
 @Entity
 public class Address {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String street;
-    @ManyToOne
-    private City city;
+    private String streetName;
+    private String buildingNumber;
+    private String apartmentNumber;
+    private String cityName;
 
 }

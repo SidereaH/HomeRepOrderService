@@ -17,14 +17,16 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String description;
+    @ManyToOne
+    private Category category;
 //    @ManyToOne
 //    private Client client;
     private Long customerId;
     private Long employeeId;
     @ManyToOne
     private Address address;
-    @ManyToOne
-    private PaymentType paymentType;
+    private String paymentType;
+    private Double totalCost;
     private Boolean accepted = false;
 
 }
