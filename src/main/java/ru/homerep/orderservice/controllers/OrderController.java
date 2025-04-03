@@ -1,13 +1,16 @@
 package ru.homerep.orderservice.controllers;
 
 import ru.homerep.orderservice.models.Order;
+import ru.homerep.orderservice.models.PaymentType;
 import ru.homerep.orderservice.models.dto.AssignResponse;
+import ru.homerep.orderservice.models.dto.DefaultResponse;
 import ru.homerep.orderservice.services.MatchingService;
 import ru.homerep.orderservice.services.OrderService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/orders")
@@ -22,8 +25,14 @@ public class OrderController {
     }
 
     @PostMapping
-    public ResponseEntity<Order> createOrder(@RequestBody Order order) {
-        return ResponseEntity.ok(orderService.createOrder(order));
+    public ResponseEntity<DefaultResponse<Order, String>> createOrder(@RequestBody Order order) {
+        try {
+            Optional<Order> savedOrder = orderService.createOrder(order);
+            return ResponseEntity.ok(new DefaultResponse<>(savedOrder.get(), "Success"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(new DefaultResponse<>(order, "Error: " + e.getMessage()));
+        }
     }
 
     @GetMapping
@@ -42,4 +51,15 @@ public class OrderController {
         Order order = orderService.assignOrder(Long.parseLong(orderId), Long.parseLong(workerId));
         return ResponseEntity.ok(new AssignResponse("Запрос выполнен", order.getId(),order.getEmployeeId()));
     }
+//    @DeleteMapping()
+//    public ResponseEntity<DefaultResponse<PaymentType,String>> deletePayment(@RequestParam String paymentTypeName) {
+//        try {
+//            PaymentType toDel = orderservice.findByName(paymentTypeName).orElseThrow(() -> new RuntimeException("Payment type does not exist"));
+//            paymentTypeRepository.delete(toDel);
+//            return ResponseEntity.ok(new DefaultResponse<>(toDel, "Success"));
+//        } catch (RuntimeException e){
+//            return ResponseEntity.badRequest()
+//                    .body(new DefaultResponse<>(null, "Error: " + e.getMessage()));
+//        }
+//    }
 }
