@@ -10,13 +10,20 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
   kafka:
     bootstrap-servers:
-      - localhost:9092
+#      - localhost:9092
       - localhost:9093
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 server:
   port: 8084
+grpc:
+  client:
+    location-service:
+      address: static://localhost:50051
+      negotiation-type: plaintext
+  server:
+    port: 9091

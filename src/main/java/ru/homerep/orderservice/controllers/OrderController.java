@@ -1,5 +1,6 @@
 package ru.homerep.orderservice.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import ru.homerep.orderservice.models.Order;
 import ru.homerep.orderservice.models.PaymentType;
 import ru.homerep.orderservice.models.dto.AssignResponse;
@@ -42,8 +43,12 @@ public class OrderController {
 
 
     @PostMapping("order/findWorker/")
-    public ResponseEntity<Integer> findWorker(@RequestBody Order order) {
-        return ResponseEntity.ok(matchingService.findWorker(order));
+    public ResponseEntity<Integer> findWorker(@RequestParam String order) {
+        try {
+            return ResponseEntity.ok(matchingService.findWorker(order));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @PostMapping("order/{orderId}/assignWorker/{workerId}")

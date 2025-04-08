@@ -2,6 +2,8 @@ package ru.homerep.orderservice;
 
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -27,13 +29,14 @@ class MatchingServiceTest {
     }
 
     @Test
-    void testFindWorker_whenWorkersAreFound() {
+    void testFindWorker_whenWorkersAreFound() throws JsonProcessingException {
         Order order = createMockOrder(55.75, 37.61);
         long[] nearbyWorkers = new long[]{1L, 2L, 3L};
 
         when(locationServiceClient.getUsersByLatLng(55.75, 37.61, 10)).thenReturn(nearbyWorkers);
-
-        int result = matchingService.findWorker(order);
+        ObjectMapper mapper = new ObjectMapper();
+        String orderJson = mapper.writeValueAsString(order);
+        int result = matchingService.findWorker(orderJson);
 
         verify(locationServiceClient, times(1)).getUsersByLatLng(55.75, 37.61, 10);
         verify(kafkaTemplate, times(3)).send(eq("notification-topic"), contains("New order available for worker"));
@@ -41,11 +44,12 @@ class MatchingServiceTest {
     }
 
     @Test
-    void testFindWorker_whenNoWorkersFound() {
+    void testFindWorker_whenNoWorkersFound() throws JsonProcessingException {
         Order order = createMockOrder(55.75, 37.61);
         when(locationServiceClient.getUsersByLatLng(55.75, 37.61, 10)).thenReturn(new long[]{});
-
-        int result = matchingService.findWorker(order);
+        ObjectMapper mapper = new ObjectMapper();
+        String orderJson = mapper.writeValueAsString(order);
+        int result = matchingService.findWorker(orderJson);
 
         verify(locationServiceClient, times(1)).getUsersByLatLng(55.75, 37.61, 10);
         verify(kafkaTemplate, never()).send(anyString(), anyString());

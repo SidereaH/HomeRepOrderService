@@ -43,10 +43,10 @@ public class OrderService {
         Address address = order.getAddress();
         addressRepository.save(address);
 
-        PaymentType payment = paymentTypeRepository.findByName(category.getName()).orElseThrow(() -> new RuntimeException("Payment type not found"));
+        PaymentType payment = paymentTypeRepository.findByName(order.getPaymentType().getName()).orElseThrow(() -> new RuntimeException("Payment type not found"));
         order.setPaymentType(payment);
         Order savedOrder = orderRepository.save(order);
-        kafkaTemplateOrder.send("order-topic", savedOrder); // Отправка в Kafka
+        kafkaTemplateOrder.send("order-topic", savedOrder);
 
         return Optional.of(savedOrder);
     }
