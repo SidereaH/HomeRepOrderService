@@ -41,7 +41,6 @@ public class PaymentController {
         try{
             PaymentType paymentType = paymentTypeRepository.findByName(paymentName).orElseThrow(() -> new RuntimeException("Error while finding payment type with name: " + paymentName));
             paymentType.setIsActive(true);
-            //обновить состояние в бд
             paymentTypeRepository.save(paymentType);
             return ResponseEntity.ok(new DefaultResponse<>(paymentType, "Success"));
         }

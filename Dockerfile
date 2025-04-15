@@ -17,6 +17,6 @@ COPY --from=builder /app/build/libs/*.jar app.jar
 
 ENV SPRING_APPLICATION_NAME=HomeRepOrderService
 
-EXPOSE 8083
+EXPOSE 8084
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
