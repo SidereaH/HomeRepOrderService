@@ -45,14 +45,15 @@ class OrderServiceTest {
 
         Address address = new Address();
         PaymentType paymentType = new PaymentType();
-        paymentType.setName("Cleaning");
+        paymentType.setName("MIR");
 
         Order order = new Order();
         order.setCategory(category);
         order.setAddress(address);
+        order.setPaymentType(paymentType);
 
         when(categoryRepository.findByName("Cleaning")).thenReturn(Optional.of(category));
-        when(paymentTypeRepository.findByName("Cleaning")).thenReturn(Optional.of(paymentType));
+        when(paymentTypeRepository.findByName("MIR")).thenReturn(Optional.of(paymentType));
         when(orderRepository.save(order)).thenReturn(order);
 
         Optional<Order> result = orderService.createOrder(order);
