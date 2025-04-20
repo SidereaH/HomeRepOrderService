@@ -1,7 +1,7 @@
 stages:
   - test
-  - build
   - clean_latest
+  - build
   - deploy
 
 variables:
