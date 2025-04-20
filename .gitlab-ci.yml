@@ -39,8 +39,7 @@ build:
       - order_service.tag
   only:
     - main
-  tags:
-    - cloudru1
+
 trigger_deploy:
   stage: deploy
   script:
