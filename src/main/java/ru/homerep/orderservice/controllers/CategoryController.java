@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.homerep.orderservice.models.Category;
 import ru.homerep.orderservice.repositories.CategoryRepository;
+import ru.homerep.orderservice.services.CategoryService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,8 +13,11 @@ import java.util.List;
 @RequestMapping("/categories")
 public class CategoryController {
     private final CategoryRepository categoryRepository;
-    public CategoryController(CategoryRepository categoryRepository) {
+    private final CategoryService categoryService;
+
+    public CategoryController(CategoryRepository categoryRepository, CategoryService categoryService) {
         this.categoryRepository = categoryRepository;
+        this.categoryService = categoryService;
     }
 
     @GetMapping
@@ -22,7 +26,11 @@ public class CategoryController {
     }
     @PostMapping
     public ResponseEntity<Category> createCategory(@RequestBody Category category) {
-        return ResponseEntity.ok(categoryRepository.save(category));
+        boolean isNewCategory = categoryService.saveCategory(category);
+        if(isNewCategory) {
+            return ResponseEntity.badRequest().body(category);
+        }
+        return ResponseEntity.ok().body(category);
     }
 
 
