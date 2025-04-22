@@ -40,11 +40,12 @@ public class OrderService {
         Category saved = categoryRepository.findByName(category.getName()).orElseThrow(() -> new RuntimeException("Category not found"));
         order.setCategory(saved);
 
-        Address address = order.getAddress();
+        Address address = new Address(order.getAddress().getStreetName(), order.getAddress().getBuildingNumber(), order.getAddress().getApartmentNumber(), order.getAddress().getCityName());
         addressRepository.save(address);
 
         PaymentType payment = paymentTypeRepository.findByName(order.getPaymentType().getName()).orElseThrow(() -> new RuntimeException("Payment type not found"));
         order.setPaymentType(payment);
+        order.setAddress(address);
         Order savedOrder = orderRepository.save(order);
         kafkaTemplateOrder.send("order-topic", savedOrder);
 
