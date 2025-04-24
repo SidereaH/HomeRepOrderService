@@ -27,3 +27,5 @@ grpc:
       negotiation-type: plaintext
   server:
     port: 9091
+homerep:
+  yandex-geo: "9f5c3498-6789-42c9-9355-82b5a56f0734"

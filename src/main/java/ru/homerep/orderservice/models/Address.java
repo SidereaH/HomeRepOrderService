@@ -105,5 +105,18 @@ public class Address {
         }
         return new GeoPair(0,0);
     }
+
+    @Override
+    public String toString() {
+        return "Address{" +
+                ", id=" + id +
+                ", streetName='" + streetName + '\'' +
+                ", buildingNumber='" + buildingNumber + '\'' +
+                ", apartmentNumber='" + apartmentNumber + '\'' +
+                ", cityName='" + cityName + '\'' +
+                ", longitude=" + longitude +
+                ", latitude=" + latitude +
+                '}';
+    }
 }
 

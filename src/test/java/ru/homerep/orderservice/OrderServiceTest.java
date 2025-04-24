@@ -37,35 +37,60 @@ class OrderServiceTest {
         orderService = new OrderService(orderRepository, kafkaTemplateOrder, kafkaTemplateNotification,
                 addressRepository, categoryRepository, paymentTypeRepository);
     }
-
     @Test
     void createOrder_success() {
+        // Given
         Category category = new Category();
         category.setName("Cleaning");
+        category.setId(1L);
 
-        Address address = new Address();
+        Address inputAddress = new Address();
+        inputAddress.setStreetName("Main St");
+        inputAddress.setBuildingNumber("10");
+        inputAddress.setApartmentNumber("5");
+        inputAddress.setCityName("Moscow");
+
         PaymentType paymentType = new PaymentType();
         paymentType.setName("MIR");
+        paymentType.setId(1L);
 
         Order order = new Order();
         order.setCategory(category);
-        order.setAddress(address);
+        order.setAddress(inputAddress);
         order.setPaymentType(paymentType);
 
+        Address savedAddress = new Address();
+        savedAddress.setId(1L);
+        savedAddress.setStreetName(inputAddress.getStreetName());
+        savedAddress.setBuildingNumber(inputAddress.getBuildingNumber());
+        savedAddress.setApartmentNumber(inputAddress.getApartmentNumber());
+        savedAddress.setCityName(inputAddress.getCityName());
+        savedAddress.setLongitude(0.0);
+        savedAddress.setLatitude(0.0);
+
+        Order savedOrder = new Order();
+        savedOrder.setId(1L);
+        savedOrder.setCategory(category);
+        savedOrder.setAddress(savedAddress);
+        savedOrder.setPaymentType(paymentType);
+
+        // When
         when(categoryRepository.findByName("Cleaning")).thenReturn(Optional.of(category));
         when(paymentTypeRepository.findByName("MIR")).thenReturn(Optional.of(paymentType));
-        when(orderRepository.save(order)).thenReturn(order);
+        when(addressRepository.save(any(Address.class))).thenReturn(savedAddress);
+        when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
 
+        // Then
         Optional<Order> result = orderService.createOrder(order);
 
         assertTrue(result.isPresent());
-        assertEquals(order, result.get());
+        assertEquals(savedOrder.getId(), result.get().getId());
+        assertEquals(savedAddress.getId(), result.get().getAddress().getId());
 
-        verify(addressRepository, times(1)).save(address);
-        verify(orderRepository, times(1)).save(order);
-        verify(kafkaTemplateOrder, times(1)).send(eq("order-topic"), eq(order));
+        verify(addressRepository, times(1)).save(any(Address.class));
+        verify(orderRepository, times(1)).save(any(Order.class));
+        verify(kafkaTemplateOrder, times(1)).send(eq("order-topic"), any(Order.class));
     }
-
     @Test
     void createOrder_categoryNotFound() {
         Order order = new Order();

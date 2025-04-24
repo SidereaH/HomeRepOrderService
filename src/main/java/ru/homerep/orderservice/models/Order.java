@@ -29,4 +29,17 @@ public class Order {
     private PaymentType paymentType;
     private Boolean accepted = false;
 
+    @Override
+    public String toString() {
+        return "Order{" +
+                "id=" + id +
+                ", description='" + description + '\'' +
+                ", category=" + category +
+                ", customerId=" + customerId +
+                ", employeeId=" + employeeId +
+                ", address=" + address +
+                ", paymentType=" + paymentType +
+                ", accepted=" + accepted +
+                '}';
+    }
 }
