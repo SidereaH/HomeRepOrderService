@@ -41,7 +41,7 @@ public class PaymentController {
         try{
             PaymentType paymentType = paymentTypeRepository.findByName(paymentName).orElseThrow(() -> new RuntimeException("Error while finding payment type with name: " + paymentName));
             paymentType.setIsActive(true);
-            paymentTypeRepository.save(paymentType);
+            paymentTypeRepository.saveAndFlush(paymentType);
             return ResponseEntity.ok(new DefaultResponse<>(paymentType, "Success"));
         }
         catch (RuntimeException e){
@@ -55,7 +55,7 @@ public class PaymentController {
             PaymentType paymentType = paymentTypeRepository.findByName(paymentName).orElseThrow(() -> new RuntimeException("Error while finding payment type with name: " + paymentName));
             paymentType.setIsActive(false);
             //обновить состояние в бд
-            paymentTypeRepository.save(paymentType);
+            paymentTypeRepository.saveAndFlush(paymentType);
             return ResponseEntity.ok(new DefaultResponse<>(paymentType, "Success"));
         }
         catch (RuntimeException e){
