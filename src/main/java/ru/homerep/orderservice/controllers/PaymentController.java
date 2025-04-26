@@ -9,6 +9,7 @@ import ru.homerep.orderservice.models.PaymentType;
 import ru.homerep.orderservice.models.dto.DefaultResponse;
 import ru.homerep.orderservice.repositories.CategoryRepository;
 import ru.homerep.orderservice.repositories.PaymentTypeRepository;
+import ru.homerep.orderservice.services.PaymentService;
 
 
 import java.util.Optional;
@@ -17,9 +18,10 @@ import java.util.Optional;
 @RequestMapping("/payments")
 public class PaymentController {
     private final PaymentTypeRepository paymentTypeRepository;
-
-    public PaymentController(PaymentTypeRepository paymentTypeRepository) {
+    private final PaymentService paymentService;
+    public PaymentController(PaymentTypeRepository paymentTypeRepository, PaymentService paymentService) {
         this.paymentTypeRepository = paymentTypeRepository;
+        this.paymentService = paymentService;
     }
 
     @GetMapping
@@ -39,10 +41,8 @@ public class PaymentController {
     @PatchMapping("/activate")
     public ResponseEntity<DefaultResponse<PaymentType,String>> activatePayment(@RequestParam String paymentName) {
         try{
-            PaymentType paymentType = paymentTypeRepository.findByName(paymentName).orElseThrow(() -> new RuntimeException("Error while finding payment type with name: " + paymentName));
-            paymentType.setIsActive(true);
-            paymentTypeRepository.saveAndFlush(paymentType);
-            return ResponseEntity.ok(new DefaultResponse<>(paymentType, "Success"));
+            PaymentType type = paymentService.activatePayment(paymentName);
+            return ResponseEntity.ok(new DefaultResponse<>(type, "Success"));
         }
         catch (RuntimeException e){
             return ResponseEntity.badRequest()
@@ -52,11 +52,8 @@ public class PaymentController {
     @PatchMapping("/deactivate")
     public ResponseEntity<DefaultResponse<PaymentType,String>> deactivatePayment(@RequestParam String paymentName) {
         try{
-            PaymentType paymentType = paymentTypeRepository.findByName(paymentName).orElseThrow(() -> new RuntimeException("Error while finding payment type with name: " + paymentName));
-            paymentType.setIsActive(false);
-            //обновить состояние в бд
-            paymentTypeRepository.saveAndFlush(paymentType);
-            return ResponseEntity.ok(new DefaultResponse<>(paymentType, "Success"));
+            PaymentType type = paymentService.deactivatePayment(paymentName);
+            return ResponseEntity.ok(new DefaultResponse<>(type, "Success"));
         }
         catch (RuntimeException e){
             return ResponseEntity.badRequest()
