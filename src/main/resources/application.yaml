@@ -2,7 +2,7 @@ spring:
   application:
     name: HomeRepOrderService
   datasource:
-    url: jdbc:postgresql://localhost:5434/homerep_orders
+    url: jdbc:postgresql://82.202.143.3:5434/homerep_orders
     username: "postgres"
     password: "postgres"
     driver-class-name: org.postgresql.Driver

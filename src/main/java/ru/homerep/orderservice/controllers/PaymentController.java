@@ -1,5 +1,6 @@
 package ru.homerep.orderservice.controllers;
 
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.tool.schema.spi.SqlScriptException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +14,7 @@ import ru.homerep.orderservice.services.PaymentService;
 
 
 import java.util.Optional;
-
+@Slf4j
 @RestController
 @RequestMapping("/payments")
 public class PaymentController {
@@ -42,6 +43,7 @@ public class PaymentController {
     public ResponseEntity<DefaultResponse<PaymentType,String>> activatePayment(@RequestParam String paymentName) {
         try{
             PaymentType type = paymentService.activatePayment(paymentName);
+            log.info("Payment {} activated", type.getName());
             return ResponseEntity.ok(new DefaultResponse<>(type, "Success"));
         }
         catch (RuntimeException e){
