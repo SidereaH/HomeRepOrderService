@@ -1,6 +1,7 @@
 package ru.homerep.orderservice.services;
 
 
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import ru.homerep.orderservice.models.Address;
 import ru.homerep.orderservice.models.Category;
@@ -18,6 +19,7 @@ import java.util.Optional;
 
 @Slf4j
 @Service
+@Transactional
 public class OrderService {
     private final OrderRepository orderRepository;
     private final KafkaTemplate<String, Order> kafkaTemplateOrder;

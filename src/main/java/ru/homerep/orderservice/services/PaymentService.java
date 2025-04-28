@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.homerep.orderservice.models.PaymentType;
 import ru.homerep.orderservice.repositories.PaymentTypeRepository;
 @Service
+@Transactional
 public class PaymentService {
     private final PaymentTypeRepository paymentTypeRepository;
 
