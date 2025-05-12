@@ -53,9 +53,25 @@ public class OrderService {
 
         return Optional.of(savedOrder);
     }
-
+    @Transactional
+    public Order updateOrder(Order order) {
+        return orderRepository.findById(order.getId())
+                .map(orderToUpdate -> {
+                    orderToUpdate.setAddress(order.getAddress());
+                    orderToUpdate.setCategory(order.getCategory());
+                    orderToUpdate.setPaymentType(order.getPaymentType());
+                    orderToUpdate.setEmployeeId(order.getEmployeeId());
+//                    orderToUpdate.setAccepted(order.isAccepted());
+                    orderToUpdate.setDescription(order.getDescription());
+                    return orderRepository.save(orderToUpdate);
+                }).orElseThrow(() -> new RuntimeException("Order not found"));
+    }
+    @Transactional
     public List<Order> getAllOrders() {
         return orderRepository.findAll();
+    }
+    public Order getOrderById(Long id){
+        return orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Order not found"));
     }
     public Order assignOrder(Long orderId, Long employeeId) {
         Order order = orderRepository.findById(orderId)

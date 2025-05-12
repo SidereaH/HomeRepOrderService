@@ -2,6 +2,8 @@ package ru.homerep.orderservice.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.aspectj.weaver.bcel.AtAjAttributes;
+import org.springframework.http.HttpStatus;
 import ru.homerep.orderservice.models.Order;
 import ru.homerep.orderservice.models.dto.AssignResponse;
 import ru.homerep.orderservice.models.dto.DefaultResponse;
@@ -42,6 +44,25 @@ public class OrderController {
     @GetMapping
     public ResponseEntity<List<Order>> getAllOrders() {
         return ResponseEntity.ok(orderService.getAllOrders());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Order> getOrderById(@PathVariable Long id) {
+        Order order = orderService.getOrderById(id);
+        if (order == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(order, HttpStatus.OK);
+    }
+    @PutMapping
+    public ResponseEntity<DefaultResponse<Order, String>> updateOrder(@RequestBody Order order) {
+        try {
+            Order updatedOrder = orderService.updateOrder(order);
+            return ResponseEntity.ok(new DefaultResponse<>(updatedOrder, "Success"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(new DefaultResponse<>(order, "Error: " + e.getMessage()));
+    }
     }
 
 
