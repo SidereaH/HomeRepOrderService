@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import ru.homerep.orderservice.config.HomeRepProperties;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,8 +21,6 @@ import java.net.URL;
 @Table(name = "addresses")
 @Entity
 public class Address {
-    @Value("${homerep.yandexgeo}")
-    private String YANDEX_API;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,7 +47,8 @@ public class Address {
     }
 
     public void fillCords() throws IOException {
-        String apiUrl = "https://geocode-maps.yandex.ru/1.x/?apikey=" + YANDEX_API +
+        HomeRepProperties props = new HomeRepProperties();
+        String apiUrl = "https://geocode-maps.yandex.ru/1.x/?apikey=" + props.getYandexgeo() +
                 "&geocode=" + cityName + streetName + buildingNumber + "&format=json";
 
         // Create connection
