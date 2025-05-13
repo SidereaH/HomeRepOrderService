@@ -43,7 +43,7 @@ public class OrderService {
         order.setCategory(saved);
 
         Address address;
-        if(order.getAddress().getLatitude() == 0) {
+        if(order.getAddress().getLatitude() == 0 ||order.getAddress().getLatitude().equals(null)  ) {
             address = new Address(order.getAddress().getStreetName(), order.getAddress().getBuildingNumber(), order.getAddress().getApartmentNumber(), order.getAddress().getCityName());
         }
         else{

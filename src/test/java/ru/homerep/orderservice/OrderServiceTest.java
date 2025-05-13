@@ -49,7 +49,8 @@ class OrderServiceTest {
         inputAddress.setBuildingNumber("10");
         inputAddress.setApartmentNumber("5");
         inputAddress.setCityName("Moscow");
-
+        inputAddress.setLongitude(1.0);
+        inputAddress.setLatitude(1.0);
         PaymentType paymentType = new PaymentType();
         paymentType.setName("MIR");
         paymentType.setId(1L);
@@ -65,8 +66,8 @@ class OrderServiceTest {
         savedAddress.setBuildingNumber(inputAddress.getBuildingNumber());
         savedAddress.setApartmentNumber(inputAddress.getApartmentNumber());
         savedAddress.setCityName(inputAddress.getCityName());
-        savedAddress.setLongitude(0.0);
-        savedAddress.setLatitude(0.0);
+        savedAddress.setLongitude(1.0);
+        savedAddress.setLatitude(1.0);
 
         Order savedOrder = new Order();
         savedOrder.setId(1L);
