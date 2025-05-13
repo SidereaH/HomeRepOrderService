@@ -20,7 +20,7 @@ import java.net.URL;
 @Table(name = "addresses")
 @Entity
 public class Address {
-    @Value("${homerep.yandex-geo}")
+    @Value("${homerep.yandexgeo}")
     private String YANDEX_API;
 
     @Id
