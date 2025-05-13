@@ -41,8 +41,13 @@ public class OrderService {
         Category category = order.getCategory();
         Category saved = categoryRepository.findByName(category.getName()).orElseThrow(() -> new RuntimeException("Category not found"));
         order.setCategory(saved);
-
-        Address address = new Address(order.getAddress().getStreetName(), order.getAddress().getBuildingNumber(), order.getAddress().getApartmentNumber(), order.getAddress().getCityName());
+        Address address;
+        if(order.getAddress().getLatitude() == 0) {
+            address = new Address(order.getAddress().getStreetName(), order.getAddress().getBuildingNumber(), order.getAddress().getApartmentNumber(), order.getAddress().getCityName());
+        }
+        else{
+            address = order.getAddress();
+        }
         addressRepository.save(address);
 
         PaymentType payment = paymentTypeRepository.findByName(order.getPaymentType().getName()).orElseThrow(() -> new RuntimeException("Payment type not found"));
