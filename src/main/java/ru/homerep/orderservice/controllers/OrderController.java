@@ -2,6 +2,7 @@ package ru.homerep.orderservice.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.weaver.bcel.AtAjAttributes;
 import org.springframework.http.HttpStatus;
 import ru.homerep.orderservice.models.Order;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
-
+@Slf4j
 @RestController
 @RequestMapping("/orders")
 public class OrderController {
@@ -33,6 +34,7 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<DefaultResponse<Order, String>> createOrder(@RequestBody Order order) {
         try {
+            log.info("Creating order: " + order);
             Optional<Order> savedOrder = orderService.createOrder(order);
             return ResponseEntity.ok(new DefaultResponse<>(savedOrder.get(), "Success"));
         } catch (RuntimeException e) {
