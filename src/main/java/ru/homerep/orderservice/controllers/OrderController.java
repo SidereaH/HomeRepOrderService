@@ -70,6 +70,16 @@ public class OrderController {
                     .body(new DefaultResponse<>(order, "Error: " + e.getMessage()));
     }
     }
+    @PutMapping("/{id}")
+    public ResponseEntity<DefaultResponse<Order, String>> updateOrder(@PathVariable Long id, @RequestBody Order order) {
+        try {
+            Order updatedOrder = orderService.updateOrder(order);
+            return ResponseEntity.ok(new DefaultResponse<>(updatedOrder, "Success"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(new DefaultResponse<>(order, "Error: " + e.getMessage()));
+        }
+    }
 
 
     @PostMapping("order/findWorker/")
