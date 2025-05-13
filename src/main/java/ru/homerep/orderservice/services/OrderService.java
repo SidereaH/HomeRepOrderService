@@ -41,6 +41,7 @@ public class OrderService {
         Category category = order.getCategory();
         Category saved = categoryRepository.findByName(category.getName()).orElseThrow(() -> new RuntimeException("Category not found"));
         order.setCategory(saved);
+
         Address address;
         if(order.getAddress().getLatitude() == 0) {
             address = new Address(order.getAddress().getStreetName(), order.getAddress().getBuildingNumber(), order.getAddress().getApartmentNumber(), order.getAddress().getCityName());
@@ -94,5 +95,9 @@ public class OrderService {
         log.info("Order {} assigned to employee {}", orderId, employeeId);
         return order;
     }
+    public List<Order> getOrdersByClientId(Long clientId) {
+        return orderRepository.findOrdersByCustomerId(clientId);
+    }
+
 }
 

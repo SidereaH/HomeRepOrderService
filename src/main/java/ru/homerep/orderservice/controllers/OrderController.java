@@ -40,6 +40,10 @@ public class OrderController {
                     .body(new DefaultResponse<>(order, "Error: " + e.getMessage()));
         }
     }
+    @GetMapping("/user/{clientId}")
+    public ResponseEntity<List<Order>> getOrdersByClientId(@PathVariable Long clientId) {
+        return ResponseEntity.ok(orderService.getOrdersByClientId(clientId));
+    }
 
     @GetMapping
     public ResponseEntity<List<Order>> getAllOrders() {
