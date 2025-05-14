@@ -49,6 +49,8 @@ dependencies {
     implementation("org.springframework.kafka:spring-kafka:4.0.0-M1")
     // https://mvnrepository.com/artifact/org.json/json
     implementation("org.json:json:20250107")
+
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 }
 
 
