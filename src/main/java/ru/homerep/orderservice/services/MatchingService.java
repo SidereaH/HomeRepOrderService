@@ -29,6 +29,8 @@ public class MatchingService {
         this.kafkaTemplate = kafkaTemplate;
         this.locationServiceClient = locationServiceClient;
         this.objectMapper = objectMapper;
+        this.objectMapper.registerModule(new JavaTimeModule());
+        this.objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
     @KafkaListener(topics = "order-topic", groupId = "matching-group")
