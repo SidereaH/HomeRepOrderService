@@ -82,7 +82,7 @@ public class OrderController {
     }
 
 
-    @PostMapping("/order/findWorker/")
+    @PostMapping("/order/findWorker")
     public ResponseEntity<Integer> findWorker(@RequestParam String orderID) {
         Order order = orderRepository.findById(Long.parseLong(orderID)).orElseThrow(() -> new RuntimeException("Order not found"));
         ObjectMapper mapper = new ObjectMapper();
