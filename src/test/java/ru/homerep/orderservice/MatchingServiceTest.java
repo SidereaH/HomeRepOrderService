@@ -1,9 +1,8 @@
 package ru.homerep.orderservice;
 
-
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -21,10 +20,17 @@ class MatchingServiceTest {
     private LocationServiceClient locationServiceClient;
     private MatchingService matchingService;
     private ObjectMapper objectMapper;
+
     @BeforeEach
     void setup() {
         kafkaTemplate = Mockito.mock(KafkaTemplate.class);
         locationServiceClient = Mockito.mock(LocationServiceClient.class);
+
+        // Создаем реальный ObjectMapper с конфигурацией для тестов
+        objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
         matchingService = new MatchingService(kafkaTemplate, locationServiceClient, objectMapper);
     }
 
@@ -34,8 +40,8 @@ class MatchingServiceTest {
         long[] nearbyWorkers = new long[]{1L, 2L, 3L};
 
         when(locationServiceClient.getUsersByLatLng(55.75, 37.61, 10)).thenReturn(nearbyWorkers);
-        ObjectMapper mapper = new ObjectMapper();
-        String orderJson = mapper.writeValueAsString(order);
+
+        String orderJson = objectMapper.writeValueAsString(order);
         int result = matchingService.findWorker(orderJson);
 
         verify(locationServiceClient, times(1)).getUsersByLatLng(55.75, 37.61, 10);
@@ -47,8 +53,8 @@ class MatchingServiceTest {
     void testFindWorker_whenNoWorkersFound() throws JsonProcessingException {
         Order order = createMockOrder(55.75, 37.61);
         when(locationServiceClient.getUsersByLatLng(55.75, 37.61, 10)).thenReturn(new long[]{});
-        ObjectMapper mapper = new ObjectMapper();
-        String orderJson = mapper.writeValueAsString(order);
+
+        String orderJson = objectMapper.writeValueAsString(order);
         int result = matchingService.findWorker(orderJson);
 
         verify(locationServiceClient, times(1)).getUsersByLatLng(55.75, 37.61, 10);
@@ -68,4 +74,3 @@ class MatchingServiceTest {
         return order;
     }
 }
-
