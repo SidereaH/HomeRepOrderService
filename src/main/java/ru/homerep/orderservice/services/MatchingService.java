@@ -20,22 +20,20 @@ public class MatchingService {
 //    private final WorkerRepository workerRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final LocationServiceClient locationServiceClient;
-
+    private final ObjectMapper objectMapper;
     public MatchingService(
 //            WorkerRepository workerRepository,
             KafkaTemplate<String, String> kafkaTemplate,
-            LocationServiceClient locationServiceClient) {
+            LocationServiceClient locationServiceClient, ObjectMapper objectMapper) {
 //        this.workerRepository = workerRepository;
         this.kafkaTemplate = kafkaTemplate;
         this.locationServiceClient = locationServiceClient;
+        this.objectMapper = objectMapper;
     }
 
     @KafkaListener(topics = "order-topic", groupId = "matching-group")
     public Integer findWorker(String orderJson) throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        Order order = mapper.readValue(orderJson, Order.class);
+        Order order = objectMapper.readValue(orderJson, Order.class);
         Double lat = order.getAddress().getLatitude();
         Double lon = order.getAddress().getLongitude();
         //среди всех работников найти ближайших через микросервис userservice

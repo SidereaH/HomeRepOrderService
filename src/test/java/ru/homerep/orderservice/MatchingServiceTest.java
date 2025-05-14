@@ -20,12 +20,12 @@ class MatchingServiceTest {
     private KafkaTemplate<String, String> kafkaTemplate;
     private LocationServiceClient locationServiceClient;
     private MatchingService matchingService;
-
+    private ObjectMapper objectMapper;
     @BeforeEach
     void setup() {
         kafkaTemplate = Mockito.mock(KafkaTemplate.class);
         locationServiceClient = Mockito.mock(LocationServiceClient.class);
-        matchingService = new MatchingService(kafkaTemplate, locationServiceClient);
+        matchingService = new MatchingService(kafkaTemplate, locationServiceClient, objectMapper);
     }
 
     @Test
