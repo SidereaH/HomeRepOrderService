@@ -82,7 +82,7 @@ public class OrderController {
     }
 
 
-    @PostMapping("order/findWorker/")
+    @PostMapping("/order/findWorker/")
     public ResponseEntity<Integer> findWorker(@RequestParam String orderID) {
         Order order = orderRepository.findById(Long.parseLong(orderID)).orElseThrow(() -> new RuntimeException("Order not found"));
         ObjectMapper mapper = new ObjectMapper();
@@ -99,7 +99,7 @@ public class OrderController {
         }
     }
 
-    @PostMapping("order/{orderId}/assignWorker/{workerId}")
+    @PostMapping("/order/{orderId}/assignWorker/{workerId}")
     public ResponseEntity<AssignResponse> assignWorker(@PathVariable String orderId, @PathVariable String workerId) {
         Order order = orderService.assignOrder(Long.parseLong(orderId), Long.parseLong(workerId));
         return ResponseEntity.ok(new AssignResponse("Запрос выполнен", order.getId(),order.getEmployeeId()));
