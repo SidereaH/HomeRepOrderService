@@ -3,6 +3,8 @@ package ru.homerep.orderservice.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import ru.homerep.orderservice.models.Order;
 //import com.homerep.models.Worker;
@@ -31,10 +33,9 @@ public class MatchingService {
     @KafkaListener(topics = "order-topic", groupId = "matching-group")
     public Integer findWorker(String orderJson) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         Order order = mapper.readValue(orderJson, Order.class);
-        // реализовать логику поиска в микросервисе юзеров
-
-        //получить ширину долготу
         Double lat = order.getAddress().getLatitude();
         Double lon = order.getAddress().getLongitude();
         //среди всех работников найти ближайших через микросервис userservice
