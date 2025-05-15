@@ -21,5 +21,22 @@ public class KafkaConfig {
     public NewTopic notificationTopic() {
         return new NewTopic("notification-topic", 1, (short) 1);
     }
+    @Bean
+    public NewTopic approveTopic() {
+        return new NewTopic("approve-topic", 1, (short) 1);
+    }
 
+    @Bean
+    public NewTopic orderAvailableTopicTopic() {
+        return new NewTopic("order-available-topic", 1, (short) 1);
+    }
+
+    @Bean
+    public NewTopic registrationConfirmationTopic() {
+        return new NewTopic("registration-confirmation-topic", 1, (short) 1);
+    }
+    @Bean
+    public NewTopic masterFoundTopicTopic() {
+        return new NewTopic("master-found-topic", 1, (short) 1);
+    }
 }

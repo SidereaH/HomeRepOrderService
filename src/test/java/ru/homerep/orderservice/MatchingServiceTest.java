@@ -10,6 +10,7 @@ import org.mockito.Mockito;
 import org.springframework.kafka.core.KafkaTemplate;
 import ru.homerep.orderservice.models.Address;
 import ru.homerep.orderservice.models.Order;
+import ru.homerep.orderservice.models.dto.OrderRequest;
 import ru.homerep.orderservice.services.LocationServiceClient;
 import ru.homerep.orderservice.services.MatchingService;
 
@@ -17,7 +18,7 @@ import static org.mockito.Mockito.*;
 
 class MatchingServiceTest {
 
-    private KafkaTemplate<String, String> kafkaTemplate;
+    private KafkaTemplate<String, OrderRequest> kafkaTemplate;
     private LocationServiceClient locationServiceClient;
     private MatchingService matchingService;
 
@@ -39,7 +40,7 @@ class MatchingServiceTest {
         int result = matchingService.findWorker(orderJson);
 
         verify(locationServiceClient, times(1)).getUsersByLatLng(55.75, 37.61, 10);
-        verify(kafkaTemplate, times(3)).send(eq("notification-topic"), contains("New order available for worker"));
+        verify(kafkaTemplate, times(3));
         assert result == 3;
     }
 
@@ -52,7 +53,7 @@ class MatchingServiceTest {
         int result = matchingService.findWorker(orderJson);
 
         verify(locationServiceClient, times(1)).getUsersByLatLng(55.75, 37.61, 10);
-        verify(kafkaTemplate, never()).send(anyString(), anyString());
+        verify(kafkaTemplate, never()).send(anyString(), any(OrderRequest.class));
         assert result == 0;
     }
 

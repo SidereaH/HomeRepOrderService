@@ -12,18 +12,20 @@ import ru.homerep.orderservice.models.Order;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import ru.homerep.orderservice.models.dto.OrderRequest;
 
 import java.util.List;
 @Slf4j
 @Service
 public class MatchingService {
 //    private final WorkerRepository workerRepository;
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaTemplate<String, OrderRequest> kafkaTemplate;
+
     private final LocationServiceClient locationServiceClient;
     private final ObjectMapper objectMapper;
     public MatchingService(
 //            WorkerRepository workerRepository,
-            KafkaTemplate<String, String> kafkaTemplate,
+            KafkaTemplate<String, OrderRequest> kafkaTemplate,
             LocationServiceClient locationServiceClient, ObjectMapper objectMapper) {
 //        this.workerRepository = workerRepository;
         this.kafkaTemplate = kafkaTemplate;
@@ -33,7 +35,7 @@ public class MatchingService {
         this.objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
-    @KafkaListener(topics = "order-topic", groupId = "matching-group")
+    @KafkaListener(topics = "order-topic")
     public Integer findWorker(String orderJson) throws JsonProcessingException {
         Order order = objectMapper.readValue(orderJson, Order.class);
         Double lat = order.getAddress().getLatitude();
@@ -43,7 +45,7 @@ public class MatchingService {
 
         if (nearbyWorkers.length > 0) {
             for (long worker : nearbyWorkers) {
-                kafkaTemplate.send("notification-topic", "New order available for worker: " + worker);
+                kafkaTemplate.send("order-available-topic", new OrderRequest(order.getId().toString(),order.getCategory().getName(), null, "hutornoyaa@gmail.com", null, order.getCreatedAt().toString(), null,"hutornoyaa@gmail.com",order.getCreatedAt().toString(),null));
                 log.info("sended to notification-topic about avaliable topic");
             }
         } else {

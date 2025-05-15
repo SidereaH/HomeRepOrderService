@@ -7,6 +7,7 @@ import ru.homerep.orderservice.models.Address;
 import ru.homerep.orderservice.models.Category;
 import ru.homerep.orderservice.models.Order;
 import ru.homerep.orderservice.models.PaymentType;
+import ru.homerep.orderservice.models.dto.OrderRequest;
 import ru.homerep.orderservice.repositories.AddressRepository;
 import ru.homerep.orderservice.repositories.CategoryRepository;
 import ru.homerep.orderservice.repositories.OrderRepository;
@@ -23,12 +24,12 @@ import java.util.Optional;
 public class OrderService {
     private final OrderRepository orderRepository;
     private final KafkaTemplate<String, Order> kafkaTemplateOrder;
-    private final KafkaTemplate<String, String> kafkaTemplateNotification;
+    private final KafkaTemplate<String, OrderRequest> kafkaTemplateNotification;
     private final AddressRepository addressRepository;
     private final CategoryRepository categoryRepository;
     private final PaymentTypeRepository paymentTypeRepository;
 
-    public OrderService(OrderRepository orderRepository, KafkaTemplate<String, Order> kafkaTemplate, KafkaTemplate<String, String> kafkaTemplateNotification, AddressRepository addressRepository, CategoryRepository categoryRepository, PaymentTypeRepository paymentTypeRepository) {
+    public OrderService(OrderRepository orderRepository, KafkaTemplate<String, Order> kafkaTemplate, KafkaTemplate<String, OrderRequest> kafkaTemplateNotification, AddressRepository addressRepository, CategoryRepository categoryRepository, PaymentTypeRepository paymentTypeRepository) {
         this.orderRepository = orderRepository;
         this.kafkaTemplateOrder = kafkaTemplate;
         this.kafkaTemplateNotification = kafkaTemplateNotification;
@@ -91,7 +92,7 @@ public class OrderService {
         order.setAccepted(true);
         orderRepository.save(order);
 
-        kafkaTemplateNotification.send("notification-topic", "Order " + orderId + " assigned to employee " + employeeId);
+        kafkaTemplateNotification.send("master-found-topic", new OrderRequest(order.getId().toString(),order.getCategory().getName(), null, "hutornoyaa@gmail.com", null, order.getCreatedAt().toString(), null,"hutornoyaa@gmail.com",order.getCreatedAt().toString(),null));
         log.info("Order {} assigned to employee {}", orderId, employeeId);
         return order;
     }
