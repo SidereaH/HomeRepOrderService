@@ -6,9 +6,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.kafka.core.KafkaTemplate;
 import ru.homerep.orderservice.models.*;
+import ru.homerep.orderservice.models.dto.OrderRequest;
 import ru.homerep.orderservice.repositories.*;
 import ru.homerep.orderservice.services.OrderService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,7 +21,7 @@ class OrderServiceTest {
 
     private OrderRepository orderRepository;
     private KafkaTemplate<String, Order> kafkaTemplateOrder;
-    private KafkaTemplate<String, String> kafkaTemplateNotification;
+    private KafkaTemplate<String, OrderRequest> kafkaTemplateNotification;
     private AddressRepository addressRepository;
     private CategoryRepository categoryRepository;
     private PaymentTypeRepository paymentTypeRepository;
@@ -136,7 +138,8 @@ class OrderServiceTest {
         Order order = new Order();
         order.setId(1L);
         order.setEmployeeId(null);
-
+        order.setCategory(new Category(1L,"Cleaning", "s", 42L));
+        order.setCreatedAt(LocalDateTime.now());
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(orderRepository.save(order)).thenReturn(order);
 
@@ -146,7 +149,7 @@ class OrderServiceTest {
         assertTrue(result.getAccepted());
         verify(orderRepository, times(1)).save(order);
         verify(kafkaTemplateNotification, times(1))
-                .send(eq("notification-topic"), eq("Order 1 assigned to employee 42"));
+                .send(eq("master-found-topic"), eq( new OrderRequest(order.getId().toString(),order.getCategory().getName(), null, "hutornoyaa@gmail.com", null, order.getCreatedAt().toString(), null,"hutornoyaa@gmail.com",order.getCreatedAt().toString(),null)));
     }
 
     @Test
