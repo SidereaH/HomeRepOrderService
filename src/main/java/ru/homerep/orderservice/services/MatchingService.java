@@ -35,7 +35,7 @@ public class MatchingService {
         this.objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
-    @KafkaListener(topics = "order-topic")
+    @KafkaListener(topics = "order-topic", groupId = "matching-service")
     public Integer findWorker(String orderJson) throws JsonProcessingException {
         Order order = objectMapper.readValue(orderJson, Order.class);
         Double lat = order.getAddress().getLatitude();
