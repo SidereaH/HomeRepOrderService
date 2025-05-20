@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -35,20 +36,25 @@ class MatchingServiceTest {
     private MatchingService matchingService;
     private ObjectMapper objectMapper;
     private RestTemplate restTemplate;
-    private String USER_SERVICE_URL;
-
+    private HomeRepProperties homeRepProperties;
 
     @BeforeEach
     void setup() {
         kafkaTemplate = Mockito.mock(KafkaTemplate.class);
         locationServiceClient = Mockito.mock(LocationServiceClient.class);
+        restTemplate = Mockito.mock(RestTemplate.class);
         objectMapper = new ObjectMapper();
-        USER_SERVICE_URL = new HomeRepProperties().getUserservice() + "/clients";
+        homeRepProperties = new HomeRepProperties();
+        homeRepProperties.setUserservice("http://82.202.143.3:8083");
 
-        matchingService = new MatchingService(kafkaTemplate, locationServiceClient, objectMapper, restTemplate, new HomeRepProperties());
-
+        matchingService = new MatchingService(
+                kafkaTemplate,
+                locationServiceClient,
+                objectMapper,
+                restTemplate,
+                homeRepProperties
+        );
     }
-
     @Test
     void testFindWorker_whenWorkersAreFound() throws JsonProcessingException {
         Order order = createMockOrder(TEST_LAT, TEST_LON);
@@ -57,13 +63,24 @@ class MatchingServiceTest {
         when(locationServiceClient.getUsersByLatLng(TEST_LAT, TEST_LON, RADIUS))
                 .thenReturn(nearbyWorkers);
 
+        // Мокируем вызовы для получения email
+        when(restTemplate.getForObject(anyString(), eq(String.class)))
+                .thenReturn("worker1@example.com")
+                .thenReturn("worker2@example.com")
+                .thenReturn("worker3@example.com")
+                .thenReturn("customer@example.com");
+
         String orderJson = objectMapper.writeValueAsString(order);
         int result = matchingService.findWorker(orderJson);
 
         verify(locationServiceClient, times(1))
                 .getUsersByLatLng(TEST_LAT, TEST_LON, RADIUS);
 
-        verify(kafkaTemplate, times(3))
+        // Проверяем, что было 4 вызова getForObject (3 worker + 1 customer)
+        verify(restTemplate, times(6))
+                .getForObject(anyString(), eq(String.class));
+
+        verify(kafkaTemplate, times(nearbyWorkers.length))
                 .send(eq(ORDER_TOPIC), any(OrderRequest.class));
 
         assertEquals(3, result);
@@ -80,6 +97,9 @@ class MatchingServiceTest {
 
         verify(locationServiceClient, times(1))
                 .getUsersByLatLng(TEST_LAT, TEST_LON, RADIUS);
+
+        verify(restTemplate, never())
+                .getForObject(anyString(), eq(String.class));
 
         verify(kafkaTemplate, never())
                 .send(anyString(), any(OrderRequest.class));
@@ -103,6 +123,7 @@ class MatchingServiceTest {
         Order order = new Order();
         order.setAddress(address);
         order.setId(123L);
+        order.setCustomerId(100L);
         order.setCategory(new Category(1L, "Cleaning", "Cleaning services", 42L));
         order.setCreatedAt(LocalDateTime.now());
         return order;
