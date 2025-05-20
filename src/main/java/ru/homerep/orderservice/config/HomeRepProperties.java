@@ -11,4 +11,5 @@ import org.springframework.context.annotation.Configuration;
 @Setter
 public class HomeRepProperties {
     private String yandexgeo;
+    private String userservice;
 }

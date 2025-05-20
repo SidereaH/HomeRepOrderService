@@ -6,6 +6,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.web.client.RestTemplate;
+import ru.homerep.orderservice.config.HomeRepProperties;
 import ru.homerep.orderservice.models.Address;
 import ru.homerep.orderservice.models.Category;
 import ru.homerep.orderservice.models.Order;
@@ -32,13 +34,19 @@ class MatchingServiceTest {
     private LocationServiceClient locationServiceClient;
     private MatchingService matchingService;
     private ObjectMapper objectMapper;
+    private RestTemplate restTemplate;
+    private String USER_SERVICE_URL;
+
 
     @BeforeEach
     void setup() {
         kafkaTemplate = Mockito.mock(KafkaTemplate.class);
         locationServiceClient = Mockito.mock(LocationServiceClient.class);
         objectMapper = new ObjectMapper();
-        matchingService = new MatchingService(kafkaTemplate, locationServiceClient, objectMapper);
+        USER_SERVICE_URL = new HomeRepProperties().getUserservice() + "/clients";
+
+        matchingService = new MatchingService(kafkaTemplate, locationServiceClient, objectMapper, restTemplate, new HomeRepProperties());
+
     }
 
     @Test

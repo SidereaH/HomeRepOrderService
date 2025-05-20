@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.client.RestTemplate;
+import ru.homerep.orderservice.config.HomeRepProperties;
 import ru.homerep.orderservice.models.Order;
 //import com.homerep.models.Worker;
 //import com.homerep.repository.WorkerRepository;
@@ -23,14 +25,19 @@ public class MatchingService {
 
     private final LocationServiceClient locationServiceClient;
     private final ObjectMapper objectMapper;
+    private final RestTemplate restTemplate;
+
+    private final String USER_SERVICE_URL;
     public MatchingService(
 //            WorkerRepository workerRepository,
             KafkaTemplate<String, OrderRequest> kafkaTemplate,
-            LocationServiceClient locationServiceClient, ObjectMapper objectMapper) {
+            LocationServiceClient locationServiceClient, ObjectMapper objectMapper, RestTemplate restTemplate, HomeRepProperties props) {
 //        this.workerRepository = workerRepository;
         this.kafkaTemplate = kafkaTemplate;
         this.locationServiceClient = locationServiceClient;
         this.objectMapper = objectMapper;
+        this.restTemplate = restTemplate;
+        USER_SERVICE_URL = props.getUserservice() + "/clients";
         this.objectMapper.registerModule(new JavaTimeModule());
         this.objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
@@ -45,7 +52,9 @@ public class MatchingService {
 
         if (nearbyWorkers.length > 0) {
             for (long worker : nearbyWorkers) {
-                kafkaTemplate.send("order-available-topic", new OrderRequest(order.getId().toString(),order.getCategory().getName(), null, "hutornoyaa@gmail.com", null, order.getCreatedAt().toString(), null,"hutornoyaa@gmail.com",order.getCreatedAt().toString(),null));
+                String employeeMail =  getUserEmail(worker);
+                String userMail = getUserEmail(order.getCustomerId());
+                kafkaTemplate.send("order-available-topic", new OrderRequest(order.getId().toString(),order.getCategory().getName(), null, userMail, null, order.getCreatedAt().toString(), null,employeeMail,order.getCreatedAt().toString(),null));
                 log.info("sended to notification-topic about avaliable topic");
             }
         } else {
@@ -53,5 +62,9 @@ public class MatchingService {
             log.info("No available workers found for order: " + order.getId());
         }
         return nearbyWorkers.length;
+    }
+
+    private String getUserEmail(Long userId) {
+        return restTemplate.getForObject(USER_SERVICE_URL + "/" + userId + "/mail", String.class);
     }
 }
