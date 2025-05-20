@@ -98,7 +98,7 @@ class MatchingServiceTest {
         verify(locationServiceClient, times(1))
                 .getUsersByLatLng(TEST_LAT, TEST_LON, RADIUS);
 
-        verify(restTemplate, never())
+        verify(restTemplate, atLeastOnce())
                 .getForObject(anyString(), eq(String.class));
 
         verify(kafkaTemplate, never())
