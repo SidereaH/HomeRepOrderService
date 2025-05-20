@@ -47,13 +47,14 @@ public class MatchingService {
         Order order = objectMapper.readValue(orderJson, Order.class);
         Double lat = order.getAddress().getLatitude();
         Double lon = order.getAddress().getLongitude();
+        String userMail = getUserEmail(order.getCustomerId());
         //среди всех работников найти ближайших через микросервис userservice
         long[] nearbyWorkers = locationServiceClient.getUsersByLatLng(lat, lon,10 );
-
+        log.info("Nearby workers found for order for user "+order.getCustomerId()+": " + order.getId() + ": " + nearbyWorkers.length + " nearby");
         if (nearbyWorkers.length > 0) {
             for (long worker : nearbyWorkers) {
                 String employeeMail =  getUserEmail(worker);
-                String userMail = getUserEmail(order.getCustomerId());
+
                 kafkaTemplate.send("order-available-topic", new OrderRequest(order.getId().toString(),order.getCategory().getName(), null, userMail, null, order.getCreatedAt().toString(), null,employeeMail,order.getCreatedAt().toString(),null));
                 log.info("sended to notification-topic about avaliable topic");
             }
@@ -65,6 +66,10 @@ public class MatchingService {
     }
 
     private String getUserEmail(Long userId) {
-        return restTemplate.getForObject(USER_SERVICE_URL + "/" + userId + "/mail", String.class);
+        if (userId != null)   {
+            return restTemplate.getForObject(USER_SERVICE_URL + "/" + userId + "/mail", String.class);
+
+        }
+        else return "hutornoyaa@gmail.com";
     }
 }

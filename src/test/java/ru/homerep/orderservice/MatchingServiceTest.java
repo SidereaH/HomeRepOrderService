@@ -77,7 +77,7 @@ class MatchingServiceTest {
                 .getUsersByLatLng(TEST_LAT, TEST_LON, RADIUS);
 
         // Проверяем, что было 4 вызова getForObject (3 worker + 1 customer)
-        verify(restTemplate, times(6))
+        verify(restTemplate, times(4))
                 .getForObject(anyString(), eq(String.class));
 
         verify(kafkaTemplate, times(nearbyWorkers.length))
