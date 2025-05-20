@@ -3,6 +3,8 @@ package ru.homerep.orderservice.services;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.client.RestTemplate;
+import ru.homerep.orderservice.config.HomeRepProperties;
 import ru.homerep.orderservice.models.Address;
 import ru.homerep.orderservice.models.Category;
 import ru.homerep.orderservice.models.Order;
@@ -28,14 +30,18 @@ public class OrderService {
     private final AddressRepository addressRepository;
     private final CategoryRepository categoryRepository;
     private final PaymentTypeRepository paymentTypeRepository;
+    private final RestTemplate restTemplate;
 
-    public OrderService(OrderRepository orderRepository, KafkaTemplate<String, Order> kafkaTemplate, KafkaTemplate<String, OrderRequest> kafkaTemplateNotification, AddressRepository addressRepository, CategoryRepository categoryRepository, PaymentTypeRepository paymentTypeRepository) {
+    private final String USER_SERVICE_URL;
+    public OrderService(OrderRepository orderRepository, KafkaTemplate<String, Order> kafkaTemplate, KafkaTemplate<String, OrderRequest> kafkaTemplateNotification, AddressRepository addressRepository, CategoryRepository categoryRepository, PaymentTypeRepository paymentTypeRepository, RestTemplate restTemplate, HomeRepProperties props) {
         this.orderRepository = orderRepository;
         this.kafkaTemplateOrder = kafkaTemplate;
         this.kafkaTemplateNotification = kafkaTemplateNotification;
         this.addressRepository = addressRepository;
         this.categoryRepository = categoryRepository;
         this.paymentTypeRepository = paymentTypeRepository;
+        this.restTemplate = restTemplate;
+        USER_SERVICE_URL = props.getUserservice() + "/clients";
     }
 
     public Optional<Order> createOrder(Order order) {
@@ -91,10 +97,18 @@ public class OrderService {
         order.setEmployeeId(employeeId);
         order.setAccepted(true);
         orderRepository.save(order);
+        getUserEmail(order.getCustomerId());
 
-        kafkaTemplateNotification.send("master-found-topic", new OrderRequest(order.getId().toString(),order.getCategory().getName(), null, "hutornoyaa@gmail.com", null, order.getCreatedAt().toString(), null,"hutornoyaa@gmail.com",order.getCreatedAt().toString(),null));
+        kafkaTemplateNotification.send("master-found-topic", new OrderRequest(order.getId().toString(),order.getCategory().getName(), null, getUserEmail(order.getCustomerId()), null, order.getCreatedAt().toString(), null,getUserEmail(employeeId),order.getCreatedAt().toString(),null));
         log.info("Order {} assigned to employee {}", orderId, employeeId);
         return order;
+    }
+    private String getUserEmail(Long userId) {
+        if (userId != null)   {
+            return restTemplate.getForObject(USER_SERVICE_URL + "/" + userId + "/mail", String.class);
+
+        }
+        else return "hutornoyaa@gmail.com";
     }
     public List<Order> getOrdersByClientId(Long clientId) {
         return orderRepository.findOrdersByCustomerId(clientId);

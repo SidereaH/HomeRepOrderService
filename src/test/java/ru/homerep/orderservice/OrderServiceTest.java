@@ -1,13 +1,18 @@
 package ru.homerep.orderservice;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.web.client.RestTemplate;
+import ru.homerep.orderservice.config.HomeRepProperties;
 import ru.homerep.orderservice.models.*;
 import ru.homerep.orderservice.models.dto.OrderRequest;
 import ru.homerep.orderservice.repositories.*;
+import ru.homerep.orderservice.services.LocationServiceClient;
+import ru.homerep.orderservice.services.MatchingService;
 import ru.homerep.orderservice.services.OrderService;
 
 import java.time.LocalDateTime;
@@ -26,18 +31,29 @@ class OrderServiceTest {
     private CategoryRepository categoryRepository;
     private PaymentTypeRepository paymentTypeRepository;
     private OrderService orderService;
+    private RestTemplate restTemplate;
+    private HomeRepProperties homeRepProperties;
+
 
     @BeforeEach
-    void setUp() {
+    void setup() {
         orderRepository = mock(OrderRepository.class);
         kafkaTemplateOrder = mock(KafkaTemplate.class);
         kafkaTemplateNotification = mock(KafkaTemplate.class);
         addressRepository = mock(AddressRepository.class);
         categoryRepository = mock(CategoryRepository.class);
         paymentTypeRepository = mock(PaymentTypeRepository.class);
+        kafkaTemplateOrder = Mockito.mock(KafkaTemplate.class);
+        homeRepProperties = new HomeRepProperties();
+        homeRepProperties.setUserservice("http://82.202.143.3:8083");
 
-        orderService = new OrderService(orderRepository, kafkaTemplateOrder, kafkaTemplateNotification,
-                addressRepository, categoryRepository, paymentTypeRepository);
+        orderService = new OrderService(
+                orderRepository, kafkaTemplateOrder, kafkaTemplateNotification,
+                addressRepository, categoryRepository, paymentTypeRepository,
+                restTemplate,
+                homeRepProperties
+        );
+
     }
     @Test
     void createOrder_success() {
