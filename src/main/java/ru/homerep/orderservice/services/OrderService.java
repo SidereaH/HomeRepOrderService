@@ -1,8 +1,11 @@
 package ru.homerep.orderservice.services;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import ru.homerep.orderservice.config.HomeRepProperties;
 import ru.homerep.orderservice.models.Address;
@@ -25,7 +28,7 @@ import java.util.Optional;
 @Transactional
 public class OrderService {
     private final OrderRepository orderRepository;
-    private final KafkaTemplate<String, Order> kafkaTemplateOrder;
+    private final KafkaTemplate<String, String> kafkaTemplateNewOrder;
     private final KafkaTemplate<String, OrderRequest> kafkaTemplateNotification;
     private final AddressRepository addressRepository;
     private final CategoryRepository categoryRepository;
@@ -33,9 +36,9 @@ public class OrderService {
     private final RestTemplate restTemplate;
 
     private final String USER_SERVICE_URL;
-    public OrderService(OrderRepository orderRepository, KafkaTemplate<String, Order> kafkaTemplate, KafkaTemplate<String, OrderRequest> kafkaTemplateNotification, AddressRepository addressRepository, CategoryRepository categoryRepository, PaymentTypeRepository paymentTypeRepository, RestTemplate restTemplate, HomeRepProperties props) {
+    public OrderService(OrderRepository orderRepository, KafkaTemplate<String, String> kafkaTemplate, KafkaTemplate<String, OrderRequest> kafkaTemplateNotification, AddressRepository addressRepository, CategoryRepository categoryRepository, PaymentTypeRepository paymentTypeRepository, RestTemplate restTemplate, HomeRepProperties props) {
         this.orderRepository = orderRepository;
-        this.kafkaTemplateOrder = kafkaTemplate;
+        this.kafkaTemplateNewOrder = kafkaTemplate;
         this.kafkaTemplateNotification = kafkaTemplateNotification;
         this.addressRepository = addressRepository;
         this.categoryRepository = categoryRepository;
@@ -62,8 +65,14 @@ public class OrderService {
         order.setPaymentType(payment);
         order.setAddress(address);
         Order savedOrder = orderRepository.save(order);
-        kafkaTemplateOrder.send("order-topic", savedOrder);
-
+        ObjectMapper mapper = new ObjectMapper();
+        String orderJson = null;
+        try {
+            orderJson = mapper.writeValueAsString(order);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        kafkaTemplateNewOrder.send("order-topic", orderJson);
         return Optional.of(savedOrder);
     }
     @Transactional
