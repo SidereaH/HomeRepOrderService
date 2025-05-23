@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import ru.homerep.orderservice.config.HomeRepProperties;
@@ -38,6 +39,7 @@ public class OrderService {
     private final RestTemplate restTemplate;
 
     private final String USER_SERVICE_URL;
+    @Autowired
     public OrderService(OrderRepository orderRepository, KafkaTemplate<String, Order> kafkaTemplate, KafkaTemplate<String, OrderRequest> kafkaTemplateNotification, AddressRepository addressRepository, CategoryRepository categoryRepository, PaymentTypeRepository paymentTypeRepository, RestTemplate restTemplate, HomeRepProperties props) {
         this.orderRepository = orderRepository;
         this.kafkaTemplateNewOrder = kafkaTemplate;
@@ -48,7 +50,10 @@ public class OrderService {
         this.restTemplate = restTemplate;
         USER_SERVICE_URL = props.getUserservice() + "/clients";
     }
-
+    public void deleteOrder(Long orderId) {
+        orderRepository.deleteById(orderId);
+        log.warn("Deleted Order "+orderId);
+    }
     public Optional<Order> createOrder(Order order) {
         Category category = order.getCategory();
         Category saved = categoryRepository.findByName(category.getName()).orElseThrow(() -> new RuntimeException("Category not found"));

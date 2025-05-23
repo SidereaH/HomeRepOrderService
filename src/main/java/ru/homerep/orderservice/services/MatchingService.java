@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.client.RestTemplate;
 import ru.homerep.orderservice.config.HomeRepProperties;
 import ru.homerep.orderservice.models.Order;
@@ -28,6 +29,7 @@ public class MatchingService {
     private final RestTemplate restTemplate;
 
     private final String USER_SERVICE_URL;
+    @Autowired
     public MatchingService(
 //            WorkerRepository workerRepository,
             KafkaTemplate<String, OrderRequest> kafkaTemplate,
@@ -42,7 +44,7 @@ public class MatchingService {
         this.objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
-    @KafkaListener(topics = "order-topic", groupId = "matching-service")
+    @KafkaListener(topics = "order-topic", groupId = "matching-service",    containerFactory = "orderKafkaListenerContainerFactory")
     public Integer findWorker(Order order) throws JsonProcessingException {
 
         Double lat = order.getAddress().getLatitude();

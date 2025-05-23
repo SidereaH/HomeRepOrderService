@@ -97,6 +97,11 @@ public class OrderController {
         Order order = orderService.assignOrder(Long.parseLong(orderId), Long.parseLong(workerId));
         return ResponseEntity.ok(new AssignResponse("Запрос выполнен", order.getId(),order.getEmployeeId()));
     }
+    @DeleteMapping
+    public ResponseEntity<String> deleteOrder(@RequestParam String orderId) {
+        orderService.deleteOrder(Long.parseLong(orderId));
+        return ResponseEntity.ok("Success");
+    }
 //    @DeleteMapping()
 //    public ResponseEntity<DefaultResponse<PaymentType,String>> deletePayment(@RequestParam String paymentTypeName) {
 //        try {
