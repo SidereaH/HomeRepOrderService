@@ -50,6 +50,7 @@ public class MatchingService {
         String userMail = getUserEmail(order.getCustomerId());
         //среди всех работников найти ближайших через микросервис userservice
         long[] nearbyWorkers = locationServiceClient.getUsersByLatLng(lat, lon,10 );
+
         log.info("Nearby workers found for order for user "+order.getCustomerId()+": " + order.getId() + ": " + nearbyWorkers.length + " nearby");
         if (nearbyWorkers.length > 0) {
             for (long worker : nearbyWorkers) {

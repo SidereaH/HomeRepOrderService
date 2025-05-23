@@ -110,6 +110,7 @@ public class OrderService {
         }
         else return "hutornoyaa@gmail.com";
     }
+
     public List<Order> getOrdersByClientId(Long clientId) {
         return orderRepository.findOrdersByCustomerId(clientId);
     }
