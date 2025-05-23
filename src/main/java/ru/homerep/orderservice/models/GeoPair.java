@@ -6,6 +6,7 @@ import lombok.Setter;
 import java.time.OffsetDateTime;
 
 @Getter
+
 @Setter
 public class GeoPair {
     private  double lat;

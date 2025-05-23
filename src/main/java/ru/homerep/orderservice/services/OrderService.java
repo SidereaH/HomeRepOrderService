@@ -30,7 +30,7 @@ import java.util.Optional;
 @Transactional
 public class OrderService {
     private final OrderRepository orderRepository;
-    private final KafkaTemplate<String, String> kafkaTemplateNewOrder;
+    private final KafkaTemplate<String, Order> kafkaTemplateNewOrder;
     private final KafkaTemplate<String, OrderRequest> kafkaTemplateNotification;
     private final AddressRepository addressRepository;
     private final CategoryRepository categoryRepository;
@@ -38,7 +38,7 @@ public class OrderService {
     private final RestTemplate restTemplate;
 
     private final String USER_SERVICE_URL;
-    public OrderService(OrderRepository orderRepository, KafkaTemplate<String, String> kafkaTemplate, KafkaTemplate<String, OrderRequest> kafkaTemplateNotification, AddressRepository addressRepository, CategoryRepository categoryRepository, PaymentTypeRepository paymentTypeRepository, RestTemplate restTemplate, HomeRepProperties props) {
+    public OrderService(OrderRepository orderRepository, KafkaTemplate<String, Order> kafkaTemplate, KafkaTemplate<String, OrderRequest> kafkaTemplateNotification, AddressRepository addressRepository, CategoryRepository categoryRepository, PaymentTypeRepository paymentTypeRepository, RestTemplate restTemplate, HomeRepProperties props) {
         this.orderRepository = orderRepository;
         this.kafkaTemplateNewOrder = kafkaTemplate;
         this.kafkaTemplateNotification = kafkaTemplateNotification;
@@ -70,18 +70,10 @@ public class OrderService {
         log.warn("Saved Order "+savedOrder);
 
         ObjectMapper mapper = new ObjectMapper();
-        // Добавляем поддержку Java 8 времени и отключаем запись дат как timestamp
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-        try {
-            String orderJson = mapper.writeValueAsString(order);
-            kafkaTemplateNewOrder.send("order-topic", orderJson);
-            log.info("Sent order to Kafka: {}", orderJson);
-        } catch (JsonProcessingException e) {
-            log.error("Failed to serialize order for Kafka", e);
-            throw new RuntimeException("Failed to serialize order", e);
-        }
+            kafkaTemplateNewOrder.send("order-topic", savedOrder);
 
         return Optional.of(savedOrder);
     }
