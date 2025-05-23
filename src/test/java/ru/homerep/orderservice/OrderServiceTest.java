@@ -25,7 +25,7 @@ import static org.mockito.Mockito.*;
 class OrderServiceTest {
 
     private OrderRepository orderRepository;
-    private KafkaTemplate<String, String> kafkaTemplateOrder;
+    private KafkaTemplate<String, Order> kafkaTemplateOrder;
     private KafkaTemplate<String, OrderRequest> kafkaTemplateNotification;
     private AddressRepository addressRepository;
     private CategoryRepository categoryRepository;
@@ -109,7 +109,7 @@ class OrderServiceTest {
 
         verify(addressRepository, times(1)).save(any(Address.class));
         verify(orderRepository, times(1)).save(any(Order.class));
-        verify(kafkaTemplateOrder, times(1)).send(eq("order-topic"), any(String.class));
+        verify(kafkaTemplateOrder, times(1)).send(eq("order-topic"), any(Order.class));
     }
     @Test
     void createOrder_categoryNotFound() {

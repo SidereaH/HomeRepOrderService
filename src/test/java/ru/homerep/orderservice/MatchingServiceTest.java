@@ -83,8 +83,8 @@ class MatchingServiceTest {
         when(restTemplate.getForObject(USER_SERVICE_URL + "/" + order.getCustomerId() + "/mail", String.class))
                 .thenReturn("customer@example.com");
 
-        String orderJson = objectMapper.writeValueAsString(order);
-        int result = matchingService.findWorker(orderJson);
+//        String orderJson = objectMapper.writeValueAsString(order);
+        int result = matchingService.findWorker(order);
 
         // Verify location service call
         verify(locationServiceClient, times(1))
@@ -112,7 +112,7 @@ class MatchingServiceTest {
                 .thenReturn(new long[]{});
 
         String orderJson = objectMapper.writeValueAsString(order);
-        int result = matchingService.findWorker(orderJson);
+        int result = matchingService.findWorker(order);
 
         verify(locationServiceClient, times(1))
                 .getUsersByLatLng(TEST_LAT, TEST_LON, RADIUS);
@@ -126,13 +126,13 @@ class MatchingServiceTest {
         assertEquals(0, result);
     }
 
-    @Test
-    void testFindWorker_whenInvalidJson() {
-        String invalidJson = "{invalid}";
-        assertThrows(JsonProcessingException.class, () -> {
-            matchingService.findWorker(invalidJson);
-        });
-    }
+//    @Test
+//    void testFindWorker_whenInvalidJson() {
+//        Order invalidJson = "{invalid}";
+//        assertThrows(JsonProcessingException.class, () -> {
+//            matchingService.findWorker(invalidJson);
+//        });
+//    }
 
     private Order createMockOrder(double lat, double lon) {
         Address address = new Address();
