@@ -37,6 +37,7 @@ class OrderServiceTest {
 
     @BeforeEach
     void setup() {
+        restTemplate = Mockito.mock(RestTemplate.class);
         orderRepository = mock(OrderRepository.class);
         kafkaTemplateOrder = mock(KafkaTemplate.class);
         kafkaTemplateNotification = mock(KafkaTemplate.class);
@@ -165,7 +166,7 @@ class OrderServiceTest {
         assertTrue(result.getAccepted());
         verify(orderRepository, times(1)).save(order);
         verify(kafkaTemplateNotification, times(1))
-                .send(eq("master-found-topic"), eq( new OrderRequest(order.getId().toString(),order.getCategory().getName(), null, "hutornoyaa@gmail.com", null, order.getCreatedAt().toString(), null,"hutornoyaa@gmail.com",order.getCreatedAt().toString(),null)));
+                .send(eq("master-found-topic"), eq( new OrderRequest(order.getId().toString(),order.getCategory().getName(), null, "hutornoyaa@gmail.com", null, order.getCreatedAt().toString(), null,null,order.getCreatedAt().toString(),null)));
     }
 
     @Test
