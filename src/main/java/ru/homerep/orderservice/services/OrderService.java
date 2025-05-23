@@ -53,7 +53,7 @@ public class OrderService {
         order.setCategory(saved);
 
         Address address;
-        if(order.getAddress().getLatitude() == 0 ||order.getAddress().getLatitude().equals(null)  ) {
+        if(order.getAddress().getLatitude() == 0 || order.getAddress().getLatitude() == null) {
             address = new Address(order.getAddress().getStreetName(), order.getAddress().getBuildingNumber(), order.getAddress().getApartmentNumber(), order.getAddress().getCityName());
         }
         else{
@@ -65,6 +65,7 @@ public class OrderService {
         order.setPaymentType(payment);
         order.setAddress(address);
         Order savedOrder = orderRepository.save(order);
+        log.warn("Saved Order "+savedOrder);
         ObjectMapper mapper = new ObjectMapper();
         String orderJson = null;
         try {

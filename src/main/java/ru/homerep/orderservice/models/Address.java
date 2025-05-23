@@ -2,6 +2,7 @@ package ru.homerep.orderservice.models;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import ru.homerep.orderservice.config.HomeRepProperties;
@@ -20,6 +21,7 @@ import java.net.URL;
 @NoArgsConstructor
 @Table(name = "addresses")
 @Entity
+@Slf4j
 public class Address {
 
     @Id
@@ -38,7 +40,9 @@ public class Address {
         this.apartmentNumber = apartmentNumber;
         this.cityName = cityName;
         try{
-            this.fillCords();
+            GeoPair pair = fillCords();
+            longitude = pair.getLng();
+            latitude = pair.getLat();
         }
         catch (IOException e) {
             longitude = 0.0;
@@ -46,7 +50,7 @@ public class Address {
         }
     }
 
-    public void fillCords() throws IOException {
+    public GeoPair fillCords() throws IOException {
         HomeRepProperties props = new HomeRepProperties();
         String apiUrl = "https://geocode-maps.yandex.ru/1.x/?apikey=" + props.getYandexgeo() +
                 "&geocode=" + cityName + streetName + buildingNumber + "&format=json";
@@ -77,12 +81,13 @@ public class Address {
             // Parse JSON response
             JSONObject jsonResponse = new JSONObject(response.toString());
             GeoPair pair = processGeocodingResponse(jsonResponse);
-            this.longitude = pair.getLng();
-            this.latitude = pair.getLat();
+            log.warn(response.toString());
+            return pair;
 
         } else {
             System.out.println("GET request failed. Response Code: " + responseCode);
         }
+        return new GeoPair(0,0);
     }
 
 

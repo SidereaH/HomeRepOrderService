@@ -44,7 +44,9 @@ public class MatchingService {
 
     @KafkaListener(topics = "order-topic", groupId = "matching-service")
     public Integer findWorker(String orderJson) throws JsonProcessingException {
+        log.info("Received order JSON: {}", orderJson);
         Order order = objectMapper.readValue(orderJson, Order.class);
+
         Double lat = order.getAddress().getLatitude();
         Double lon = order.getAddress().getLongitude();
         String userMail = getUserEmail(order.getCustomerId());
