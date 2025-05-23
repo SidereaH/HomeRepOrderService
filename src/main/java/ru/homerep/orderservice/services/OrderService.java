@@ -3,6 +3,8 @@ package ru.homerep.orderservice.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -66,14 +68,21 @@ public class OrderService {
         order.setAddress(address);
         Order savedOrder = orderRepository.save(order);
         log.warn("Saved Order "+savedOrder);
+
         ObjectMapper mapper = new ObjectMapper();
-        String orderJson = null;
+        // Добавляем поддержку Java 8 времени и отключаем запись дат как timestamp
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
         try {
-            orderJson = mapper.writeValueAsString(order);
+            String orderJson = mapper.writeValueAsString(order);
+            kafkaTemplateNewOrder.send("order-topic", orderJson);
+            log.info("Sent order to Kafka: {}", orderJson);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            log.error("Failed to serialize order for Kafka", e);
+            throw new RuntimeException("Failed to serialize order", e);
         }
-        kafkaTemplateNewOrder.send("order-topic", orderJson);
+
         return Optional.of(savedOrder);
     }
     @Transactional
