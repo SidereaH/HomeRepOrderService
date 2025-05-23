@@ -54,10 +54,13 @@ public class MatchingService {
         log.info("Nearby workers found for order for user "+order.getCustomerId()+": " + order.getId() + ": " + nearbyWorkers.length + " nearby");
         if (nearbyWorkers.length > 0) {
             for (long worker : nearbyWorkers) {
-                String employeeMail =  getUserEmail(worker);
+                if (isUserWorker(worker)) {
+                    String employeeMail =  getUserEmail(worker);
 
-                kafkaTemplate.send("order-available-topic", new OrderRequest(order.getId().toString(),order.getCategory().getName(), null, userMail, null, order.getCreatedAt().toString(), null,employeeMail,order.getCreatedAt().toString(),null));
-                log.info("sended to notification-topic about avaliable topic");
+                    kafkaTemplate.send("order-available-topic", new OrderRequest(order.getId().toString(),order.getCategory().getName(), null, userMail, null, order.getCreatedAt().toString(), null,employeeMail,order.getCreatedAt().toString(),null));
+                    log.info("sended to notification-topic about avaliable topic");
+                }
+               log.warn("user %d is not worker", worker);
             }
         } else {
 
@@ -72,5 +75,11 @@ public class MatchingService {
 
         }
         else return "hutornoyaa@gmail.com";
+    }
+    private boolean isUserWorker(Long userId) {
+        if (userId != null)   {
+            return restTemplate.getForObject(USER_SERVICE_URL + "/" + userId + "/status" , Boolean.class);
+        }
+        return false;
     }
 }
