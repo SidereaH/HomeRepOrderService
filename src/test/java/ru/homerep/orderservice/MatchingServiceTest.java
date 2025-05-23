@@ -37,7 +37,7 @@ class MatchingServiceTest {
     private ObjectMapper objectMapper;
     private RestTemplate restTemplate;
     private HomeRepProperties homeRepProperties;
-
+    private String USER_SERVICE_URL;
     @BeforeEach
     void setup() {
         kafkaTemplate = Mockito.mock(KafkaTemplate.class);
@@ -54,34 +54,53 @@ class MatchingServiceTest {
                 restTemplate,
                 homeRepProperties
         );
+        USER_SERVICE_URL = homeRepProperties.getUserservice() + "/clients";
     }
     @Test
     void testFindWorker_whenWorkersAreFound() throws JsonProcessingException {
         Order order = createMockOrder(TEST_LAT, TEST_LON);
         long[] nearbyWorkers = new long[]{1L, 2L, 3L};
 
+        // Mock location service
         when(locationServiceClient.getUsersByLatLng(TEST_LAT, TEST_LON, RADIUS))
                 .thenReturn(nearbyWorkers);
 
-        // Мокируем вызовы для получения email
-        when(restTemplate.getForObject(anyString(), eq(String.class)))
-                .thenReturn("worker1@example.com")
-                .thenReturn("worker2@example.com")
-                .thenReturn("worker3@example.com")
+        // Mock worker status checks - all workers are active
+        when(restTemplate.getForObject(USER_SERVICE_URL + "/1/status", Boolean.class))
+                .thenReturn(true);
+        when(restTemplate.getForObject(USER_SERVICE_URL + "/2/status", Boolean.class))
+                .thenReturn(true);
+        when(restTemplate.getForObject(USER_SERVICE_URL + "/3/status", Boolean.class))
+                .thenReturn(true);
+
+        // Mock email lookups
+        when(restTemplate.getForObject(USER_SERVICE_URL + "/1/mail", String.class))
+                .thenReturn("worker1@example.com");
+        when(restTemplate.getForObject(USER_SERVICE_URL + "/2/mail", String.class))
+                .thenReturn("worker2@example.com");
+        when(restTemplate.getForObject(USER_SERVICE_URL + "/3/mail", String.class))
+                .thenReturn("worker3@example.com");
+        when(restTemplate.getForObject(USER_SERVICE_URL + "/" + order.getCustomerId() + "/mail", String.class))
                 .thenReturn("customer@example.com");
 
         String orderJson = objectMapper.writeValueAsString(order);
         int result = matchingService.findWorker(orderJson);
 
+        // Verify location service call
         verify(locationServiceClient, times(1))
                 .getUsersByLatLng(TEST_LAT, TEST_LON, RADIUS);
 
-        // Проверяем, что было 4 вызова getForObject (3 worker + 1 customer)
-        verify(restTemplate, times(4))
-                .getForObject(anyString(), eq(String.class));
+        // Verify status checks (3 workers)
+        verify(restTemplate, times(3))
+                .getForObject(contains("/status"), eq(Boolean.class));
 
-        verify(kafkaTemplate, times(nearbyWorkers.length))
-                .send(eq(ORDER_TOPIC), any(OrderRequest.class));
+        // Verify email lookups (3 workers + 1 customer)
+        verify(restTemplate, times(4))
+                .getForObject(contains("/mail"), eq(String.class));
+
+        // Verify Kafka messages (3 workers)
+        verify(kafkaTemplate, times(3))
+                .send(eq("order-available-topic"), any(OrderRequest.class));
 
         assertEquals(3, result);
     }

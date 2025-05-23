@@ -60,7 +60,7 @@ public class MatchingService {
                     kafkaTemplate.send("order-available-topic", new OrderRequest(order.getId().toString(),order.getCategory().getName(), null, userMail, null, order.getCreatedAt().toString(), null,employeeMail,order.getCreatedAt().toString(),null));
                     log.info("sended to notification-topic about avaliable topic");
                 }
-               log.warn("user %d is not worker", worker);
+               log.warn(String.format("user %s is not worker", worker));
             }
         } else {
 
@@ -78,7 +78,9 @@ public class MatchingService {
     }
     private boolean isUserWorker(Long userId) {
         if (userId != null)   {
-            return restTemplate.getForObject(USER_SERVICE_URL + "/" + userId + "/status" , Boolean.class);
+            Boolean resp = restTemplate.getForObject(USER_SERVICE_URL + "/" + userId + "/status", Boolean.class);
+            log.info("resp from userservice: " + resp);
+            return Boolean.TRUE.equals(resp);
         }
         return false;
     }
