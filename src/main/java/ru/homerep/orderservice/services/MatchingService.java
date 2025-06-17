@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import ru.homerep.orderservice.config.HomeRepProperties;
 import ru.homerep.orderservice.models.Order;
@@ -78,11 +79,17 @@ public class MatchingService {
         }
         else return "hutornoyaa@gmail.com";
     }
+
     private boolean isUserWorker(Long userId) {
-        if (userId != null)   {
-            Boolean resp = restTemplate.getForObject(USER_SERVICE_URL + "/" + userId + "/status", Boolean.class);
-            log.info("resp from userservice: " + resp);
-            return Boolean.TRUE.equals(resp);
+        if (userId != null) {
+            try {
+                Boolean resp = restTemplate.getForObject(USER_SERVICE_URL + "/" + userId + "/status", Boolean.class);
+                log.info("resp from userservice: " + resp);
+                return Boolean.TRUE.equals(resp);
+            } catch (HttpClientErrorException.NotFound e) {
+                log.info("User not found or not an employee");
+                return false;
+            }
         }
         return false;
     }
